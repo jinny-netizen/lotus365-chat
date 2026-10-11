@@ -10,6 +10,7 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9Ijk2IiBmaWxsPSIjMDA4ODYxIi8+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTE1MCAxMTJoODR2MjIwaDEyOHY2OEgxNTB6Ii8+PGNpcmNsZSBjeD0iMzUyIiBjeT0iMTcyIiByPSI0NCIgZmlsbD0iI2Y5ZGYxMCIvPjwvc3ZnPgo=" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://lotus365.ac">
+<link rel="dns-prefetch" href="https://connect.facebook.net">
 <link rel="dns-prefetch" href="https://lotus365.ac">
 <style>
   :root {
@@ -272,6 +273,8 @@ const MIN_AGE = 18;
 /* A message the visitor types is added to the signup link under this name,
    e.g. https://lotus365.ac/register/?c=…&msg=Hi+I+want+an+ID  ("" = don't attach). */
 const MESSAGE_PARAM = "msg";
+/* Meta (Facebook) Pixel for this brand. "" = off. */
+const META_PIXEL_ID = "1468112005086550";
 /* ===================================================================== */
 
 const params = new URLSearchParams(location.search);
@@ -549,7 +552,15 @@ function sendToWebhook(data) {
 function track(event, data = {}) {
   const payload = Object.assign({ event: "chat_" + event, brand: brandKey, source: SOURCE }, data);
   try { (window.dataLayer = window.dataLayer || []).push(payload); } catch (e) {}
-  try { if (window.fbq) fbq("trackCustom", "chat_" + event, { brand: brandKey }); if (window.fbq && event === "lead") fbq("track", "Lead"); } catch (e) {}
+  try { if (window.fbq) fbq("trackCustom", "chat_" + event, { brand: brandKey }); if (window.fbq && (event === "lead" || event === "website_click")) fbq("track", "Lead"); } catch (e) {}
+}
+
+if (META_PIXEL_ID) {
+  !function (f, n) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = "2.0"; n.queue = []; }(window);
+  fbq("init", META_PIXEL_ID);
+  fbq("track", "PageView");
+  const loadPixel = () => { const t = document.createElement("script"); t.async = true; t.src = "https://connect.facebook.net/en_US/fbevents.js"; document.head.appendChild(t); };
+  if (document.readyState === "complete") loadPixel(); else addEventListener("load", loadPixel);
 }
 
 track("open");
