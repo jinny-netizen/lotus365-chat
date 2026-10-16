@@ -274,7 +274,8 @@ const MIN_AGE = 18;
    e.g. https://lotus365.ac/register/?c=…&msg=Hi+I+want+an+ID  ("" = don't attach). */
 const MESSAGE_PARAM = "msg";
 /* Meta (Facebook) Pixel for this brand. "" = off. */
-const META_PIXEL_ID = "1468112005086550";
+const META_PIXEL_ID = "";                        // Pixel for PageView + Lead + chat events ("" = none)
+const PAGEVIEW_PIXEL_IDS = ["1757139265547420"]; // Pixels that get PageView only
 /* ===================================================================== */
 
 const params = new URLSearchParams(location.search);
@@ -552,13 +553,17 @@ function sendToWebhook(data) {
 function track(event, data = {}) {
   const payload = Object.assign({ event: "chat_" + event, brand: brandKey, source: SOURCE }, data);
   try { (window.dataLayer = window.dataLayer || []).push(payload); } catch (e) {}
-  try { if (window.fbq) fbq("trackCustom", "chat_" + event, { brand: brandKey }); if (window.fbq && (event === "lead" || event === "website_click")) fbq("track", "Lead"); } catch (e) {}
+  try { if (window.fbq && META_PIXEL_ID) { fbq("trackSingleCustom", META_PIXEL_ID, "chat_" + event, { brand: brandKey }); if (event === "lead" || event === "website_click") fbq("trackSingle", META_PIXEL_ID, "Lead"); } } catch (e) {}
 }
 
-if (META_PIXEL_ID) {
+if (META_PIXEL_ID || PAGEVIEW_PIXEL_IDS.length) {
   !function (f, n) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = "2.0"; n.queue = []; }(window);
-  fbq("init", META_PIXEL_ID);
-  fbq("track", "PageView");
+  if (META_PIXEL_ID) { fbq("init", META_PIXEL_ID); fbq("trackSingle", META_PIXEL_ID, "PageView"); }
+  PAGEVIEW_PIXEL_IDS.forEach(id => {
+    fbq("set", "autoConfig", false, id);   // no automatic button-click events for this Pixel
+    fbq("init", id);
+    fbq("trackSingle", id, "PageView");
+  });
   const loadPixel = () => { const t = document.createElement("script"); t.async = true; t.src = "https://connect.facebook.net/en_US/fbevents.js"; document.head.appendChild(t); };
   if (document.readyState === "complete") loadPixel(); else addEventListener("load", loadPixel);
 }
