@@ -274,8 +274,8 @@ const MIN_AGE = 18;
    e.g. https://lotus365.ac/register/?c=…&msg=Hi+I+want+an+ID  ("" = don't attach). */
 const MESSAGE_PARAM = "msg";
 /* Meta (Facebook) Pixel for this brand. "" = off. */
-const META_PIXEL_ID = "";                        // Pixel for PageView + Lead + chat events ("" = none)
-const PAGEVIEW_PIXEL_IDS = ["1757139265547420"]; // Pixels that get PageView only
+const META_PIXEL_ID = "1757139265547420";       // PageView + Lead (on sign-up taps) + chat events
+const PAGEVIEW_PIXEL_IDS = [];                   // optional extra Pixels that get PageView only
 /* ===================================================================== */
 
 const params = new URLSearchParams(location.search);
